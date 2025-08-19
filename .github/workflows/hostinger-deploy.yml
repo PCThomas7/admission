@@ -2,7 +2,10 @@ name: Build and publish to deploy branch
 
 on:
   push:
-    branches: [ main ]   # Run only when pushing to main
+    branches: [ main ]
+
+permissions:
+  contents: write   # <-- REQUIRED so the workflow can push to deploy
 
 jobs:
   build:
@@ -11,22 +14,28 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Use Node
+      - name: Use Node 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
+      # Use npm ci if you have package-lock.json; otherwise use npm install
       - name: Install deps
-        run: npm ci
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
 
       - name: Build
         run: npm run build
 
-      # Publish ./dist to the 'deploy' branch
+      # Publish ./dist to the 'deploy' branch (clean overwrite)
       - name: Publish dist to deploy branch
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: deploy          # Target branch
-          folder: dist            # Built folder to publish
+          branch: deploy
+          folder: dist
           clean: true
           single-commit: true
