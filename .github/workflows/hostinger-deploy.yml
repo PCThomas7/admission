@@ -1,0 +1,32 @@
+name: Build and publish to deploy branch
+
+on:
+  push:
+    branches: [ main ]   # Run only when pushing to main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Use Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # Publish ./dist to the 'deploy' branch
+      - name: Publish dist to deploy branch
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: deploy          # Target branch
+          folder: dist            # Built folder to publish
+          clean: true
+          single-commit: true
