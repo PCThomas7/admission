@@ -27,7 +27,7 @@ export default function Brochure() {
     
     try {
       // Replace with your actual API endpoint
-      const response = await fetch('https://api.example.com/submit-interest', {
+      const response = await fetch('http://localhost:5000/api/public/submit-interest', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -366,6 +366,9 @@ export default function Brochure() {
                     onChange={handleInputChange}
                     placeholder="Phone number" 
                     required
+                    type="tel"
+                    pattern="[0-9]{10}"
+                    title="Please enter a 10-digit phone number"
                   />
                 </label>
               </div>
