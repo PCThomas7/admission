@@ -1,7 +1,62 @@
-import React from "react";
+import React, { useState } from "react";
 import heroImage from "../src/assets/image.png"; 
 
 export default function Brochure() {
+  const [formData, setFormData] = useState({
+    studentName: "",
+    parentContact: "",
+    programme: "",
+    preferredMode: "Offline",
+    schoolBoard: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null); // null, 'success', 'error'
+  
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+    
+    try {
+      // Replace with your actual API endpoint
+      const response = await fetch('https://api.example.com/submit-interest', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      
+      const data = await response.json();
+      console.log('Success:', data);
+      setSubmitStatus('success');
+      // Reset form after successful submission
+      setFormData({
+        studentName: "",
+        parentContact: "",
+        programme: "",
+        preferredMode: "Offline",
+        schoolBoard: ""
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   const programs = [
     {
       id: 1,
@@ -280,58 +335,100 @@ export default function Brochure() {
               </div>
             </div>
 
-            <form id="form" className="form">
+            <form id="form" className="form" onSubmit={handleSubmit}>
+              {submitStatus === 'success' && (
+                <div className="form__message form__message--success">
+                  Thank you for your interest! We will contact you shortly.
+                </div>
+              )}
+              {submitStatus === 'error' && (
+                <div className="form__message form__message--error">
+                  There was an error submitting your form. Please try again.
+                </div>
+              )}
+              
               <div className="form__row">
                 <label className="form__field">
                   <span>Student Name</span>
-                  <input placeholder="Your full name" />
+                  <input 
+                    name="studentName"
+                    value={formData.studentName}
+                    onChange={handleInputChange}
+                    placeholder="Your full name" 
+                    required
+                  />
                 </label>
                 <label className="form__field">
                   <span>Parent Contact</span>
-                  <input placeholder="Phone number" />
+                  <input 
+                    name="parentContact"
+                    value={formData.parentContact}
+                    onChange={handleInputChange}
+                    placeholder="Phone number" 
+                    required
+                  />
                 </label>
               </div>
 
               <div className="form__row">
                 <label className="form__field">
                   <span>Programme</span>
-                  <select>
+                  <select 
+                    name="programme"
+                    value={formData.programme}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="" disabled>Select a programme</option>
                     {programs.map((p) => (
-                      <option key={p.id}>{p.title}</option>
+                      <option key={p.id} value={p.title}>{p.title}</option>
                     ))}
                   </select>
                 </label>
                 <label className="form__field">
                   <span>Preferred Mode</span>
-                  <select>
-                    <option>Offline</option>
-                    <option>Online</option>
-                    <option>Hybrid</option>
+                  <select 
+                    name="preferredMode"
+                    value={formData.preferredMode}
+                    onChange={handleInputChange}
+                  >
+                    <option value="Offline">Offline</option>
+                    <option value="Online">Online</option>
+                    <option value="Hybrid">Hybrid</option>
                   </select>
                 </label>
               </div>
 
               <label className="form__field">
                 <span>School / Board</span>
-                <input placeholder="CBSE / State" />
+                <input 
+                  name="schoolBoard"
+                  value={formData.schoolBoard}
+                  onChange={handleInputChange}
+                  placeholder="CBSE / State" 
+                  required
+                />
               </label>
-
-              <button type="button" className="btn btn--primary btn--sm">
-                Submit Interest
+              
+              <button 
+                type="submit" 
+                className="btn btn--primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Interest'}
               </button>
-              <p className="muted">We’ll contact you within one working day.</p>
             </form>
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* FAQs */}
       <section className="br-section">
         <div className="br-container">
-          <h2 className="br-h2">FAQs</h2>
+          <h2 className="br-h2">Frequently Asked Questions</h2>
           <div className="br-grid-2">
             {faqs.map((f, i) => (
-              <div key={i} className="card card--plain">
+              <div key={i} className="card">
                 <h3 className="card__title">{f.q}</h3>
                 <p className="br-paragraph">{f.a}</p>
               </div>
